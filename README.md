@@ -1,5 +1,5 @@
 # C++ Key-Value Server
-A mordern C++ key-value server project built on Linux with CMake.
+A modern C++ key-value server project built on Linux with CMake.
 The project is being developed incrementally, starting with an in-memory key-value store and later expanding to networking, concurrency, TTL support, and persistence.
 
 # Current progress:
@@ -15,6 +15,6 @@ The project is being developed incrementally, starting with an in-memory key-val
 - Persistence
 
 # Status:
-Work in progress
+Work in progress in Command parsing section
 
 
