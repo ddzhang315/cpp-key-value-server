@@ -52,12 +52,22 @@ int main()
                 std::cout<< "Item Not Found!\n";
             }
             
+        }else if(pc.command == "CONTAINS")
+        {
+            if(kv.contains(pc.key))
+            {
+                std::cout <<"Key exists!\n";
+            }else{
+                std::cout << "Key does not exist!\n";
+            }
+        }else if(pc.command == "SIZE")
+        {
+            std::cout << "Size is : " << kv.size() << "\n";
         }else if(pc.command == "Q")
         {
             
             std::cout<<"Quit success!\n";
             break;
-            
         }
     }
 

@@ -40,6 +40,20 @@ ParsedCommand parseCommand(const std::string& input)
             return result;
         }
 
+    }else if(result.command == "CONTAINS")
+    {
+        if(!(iss >> result.key))
+        {
+            result.error = "Error:(Usage: CONTAINS key)";
+            return result;
+        }
+
+        if(iss >> extra)
+        {
+            result.error = "Error:(Too many arguments. Usage: CONTAINS key.)";
+            return result;
+        }
+
     }else if(result.command == "DELETE")
     {
         if(!(iss >> result.key))
@@ -54,6 +68,14 @@ ParsedCommand parseCommand(const std::string& input)
             return result;
         }
 
+    }else if(result.command == "SIZE")
+    {
+        if(iss >> extra)
+        {
+            result.error = "Error: (Too many arguments. Usage: SIZE.)";
+            return result;
+        }
+
     }else if(result.command == "Q")
     {
         if(iss >> extra)
@@ -64,7 +86,7 @@ ParsedCommand parseCommand(const std::string& input)
 
     }else{
         
-        result.error ="Error: (Invalid command. Please provide a valid command from [GET,SET,DELETE or Q])";
+        result.error ="Error: (Invalid command. Please provide a valid command from [GET,SET,DELETE,CONTAINS,SIZE or Q])";
         return result;
     }
     return result;
