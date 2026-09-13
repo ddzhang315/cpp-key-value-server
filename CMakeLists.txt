@@ -4,4 +4,4 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_executable(key_value_server main.cpp keyValueStore.cpp)
+add_executable(key_value_server main.cpp keyValueStore.cpp commandParser.cpp)
