@@ -5,12 +5,14 @@
 #include <string>
 #include <optional>
 #include <cstddef>
+#include <mutex>
 
 
 class KeyValueStore{
 
 private:
     std::unordered_map<std::string,std::string> store;
+    mutable std::mutex mtx;
 
 public:
     void set(const std::string& key, const std::string& value);
