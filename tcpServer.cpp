@@ -9,7 +9,7 @@
 #include "commandExecutor.h"
 
 
-bool sentAll(int client_fd, const std::string& message)
+bool sendAll(int client_fd, const std::string& message)
 {
     std::size_t total_sent = 0;
 
@@ -17,7 +17,7 @@ bool sentAll(int client_fd, const std::string& message)
     {
         ssize_t sent = send(client_fd, 
             message.data()+total_sent, 
-            message.size()-total_sent,0);
+            message.size()-total_sent,MSG_NOSIGNAL);
 
         if(sent == -1)
         {
@@ -41,6 +41,63 @@ bool sentAll(int client_fd, const std::string& message)
     return true;
 }
 
+void handleClient(int client_fd, KeyValueStore& store)
+{
+    bool exit_flag = false;
+    char buff[1024];
+    std::string line;
+    while(true)
+    {
+        ssize_t n = recv(client_fd, buff, sizeof(buff), 0);
+        if(n==-1)
+        {
+            if(errno == EINTR) continue;
+            std::perror("recv");
+            return;
+        }
+
+        if(n==0)
+        {
+            std::cout << "Client disconnected!\n";
+            return;
+        }
+
+        line.append(buff,static_cast<std::size_t>(n));
+        std::size_t newline_pos;
+
+        while((newline_pos=line.find('\n'))!= std::string::npos)
+        {
+            std::string command = line.substr(0, newline_pos);
+            line.erase(0, newline_pos+1);
+            std::cout << "one complete command: "<< command << std::endl;
+
+            ParsedCommand pc = parseCommand(command);
+            std::string response ="Server Response: ";
+
+            if(!pc.error.empty())
+            {
+                response += pc.error;
+                
+            }else if(pc.command == "Q")
+            {
+                response += "GoodBye";
+                exit_flag=true;
+            }else{
+                response += executeCommand(pc, store); 
+            }
+
+            response +="\n";
+            
+            if(!sendAll(client_fd, response))
+            {
+                std::cout << "response sent failed!\n";
+                return;
+            }
+
+            if(exit_flag) return;
+        }
+    }
+} 
 
 int runServer(KeyValueStore& store)
 {
@@ -94,81 +151,9 @@ int runServer(KeyValueStore& store)
 
         std::cout << "Client connected!\n";
 
-        //receive data from client
-        bool exit_flag = false;
-        char buff[1024];
-        std::string line;
-        while(true)
-        {
-
-            ssize_t n = recv(client_fd, buff, sizeof(buff), 0);
-            if(n==-1)
-            {
-                perror("recv");
-                break;
-
-            }
-
-            if(n==0)
-            {
-                std::cout << "Client disconnected!\n";
-                break;
-
-            }
-
-            if(n>0)
-            {
-                line.append(buff,static_cast<size_t>(n));
-                std::size_t newline_pos;
-                while((newline_pos=line.find('\n'))!= std::string::npos)
-                {
-                    std::string command = line.substr(0, newline_pos);
-                    line.erase(0, newline_pos+1);
-                    std::cout << "one complete command: "<< command << std::endl;
-
-                    ParsedCommand pc = parseCommand(command);
-                    std::string response ="Response from server: ";
-
-                    if(!pc.error.empty())
-                    {
-                        response += pc.error;
-                        
-                    }else if(pc.command == "Q")
-                    {
-                        response += "GoodBye";
-                        exit_flag=true;
-                    }else{
-                        response += executeCommand(pc, store);
-                        
-                    }
-
-                    response +="\n";
-                   
-                    if(!sentAll(client_fd, response))
-                    {
-                        std::cout << "response sent failed!\n";
-                        exit_flag = true;
-                        break;
-                    }
-
-                    if(exit_flag)
-                    {
-                        break;
-                    }
-
-
-                }
-
-            }
-
-            if(exit_flag)
-            {
-                break;
-            }
-
-        }
-
+        handleClient(client_fd,store);
         close(client_fd);
+        std::cout << "Client connection closed.\n";
     }
     
     close(server_fd);
