@@ -7,6 +7,7 @@
 #include <cerrno>
 #include "commandParser.h"
 #include "commandExecutor.h"
+#include "threadPool.h"
 
 
 bool sendAll(int client_fd, const std::string& message)
@@ -99,7 +100,7 @@ void handleClient(int client_fd, KeyValueStore& store)
     }
 } 
 
-int runServer(KeyValueStore& store)
+int runServer()
 {
     int server_fd = socket(AF_INET, SOCK_STREAM,0);
 
@@ -134,7 +135,9 @@ int runServer(KeyValueStore& store)
 
     std::cout << "Listening on 127.0.0.1:8080\n";
 
-    
+    KeyValueStore store;
+    ThreadPool pool{4};
+
     while(true)
     {
         std::cout <<"Server is running and waiting for a new client...\n";
@@ -150,10 +153,12 @@ int runServer(KeyValueStore& store)
         }
 
         std::cout << "Client connected!\n";
-
-        handleClient(client_fd,store);
-        close(client_fd);
-        std::cout << "Client connection closed.\n";
+       
+        pool.enqueue([client_fd,&store]()
+        {
+            handleClient(client_fd,store);
+            close(client_fd);
+        });
     }
     
     close(server_fd);

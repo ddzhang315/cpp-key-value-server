@@ -10,8 +10,7 @@ int main()
 
     std::cout<< "C++ Key Value Server" << std::endl;
 
-    KeyValueStore kv;
-    runServer(kv);
+    runServer();
     /*
     std::string input;
 

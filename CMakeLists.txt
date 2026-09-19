@@ -4,5 +4,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+find_package(Threads REQUIRED)
+
 add_executable(key_value_server main.cpp keyValueStore.cpp commandParser.cpp tcpServer.cpp
-commandExecutor.cpp)
+commandExecutor.cpp threadPool.cpp)
+
+target_link_libraries(key_value_server PRIVATE Threads::Threads)
