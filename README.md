@@ -103,9 +103,15 @@ Client Connections
 
 ## Testing
 
-The project currently includes a basic thread-pool concurrency test that verifies task execution across multiple worker threads.
+The project includes automated tests for the thread pool and key-value store, integrated with CTest.
 
-Additional unit and integration tests are planned for the key-value store, command parser, command executor, and TCP server.
+After building the project, run:
+
+```bash
+ctest --test-dir build --output-on-failure
+```
+
+Additional unit and integration tests are planned for the command parser, command executor, and TCP server.
 
 ## Future Work
 
