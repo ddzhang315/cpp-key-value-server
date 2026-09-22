@@ -1,6 +1,8 @@
 #include "threadPool.h"
 #include <utility>
 #include <stdexcept>
+#include <exception>
+#include <iostream>
 
 void ThreadPool::workerLoop()
 {
@@ -25,7 +27,19 @@ void ThreadPool::workerLoop()
         tasks.pop();
         }
 
-        task();
+        try
+        {
+            task();
+        }
+        catch(const std::exception& e)
+        {
+            std::cerr<< "Task failed: "<< e.what() << '\n';
+        }
+        catch(...)
+        {
+            std::cerr << "Task failed: unknown exception\n";
+        }
+        
         
     }
 }

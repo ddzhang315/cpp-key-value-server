@@ -8,6 +8,8 @@
 #include "commandParser.h"
 #include "commandExecutor.h"
 #include "threadPool.h"
+#include "socketGuard.h"
+#include <exception>
 
 
 bool sendAll(int client_fd, const std::string& message)
@@ -153,12 +155,28 @@ int runServer()
         }
 
         std::cout << "Client connected!\n";
-       
-        pool.enqueue([client_fd,&store]()
+
+        try
         {
-            handleClient(client_fd,store);
+            pool.enqueue([client_fd,&store]()
+            {
+                SocketGuard clientSocket{client_fd};
+                handleClient(client_fd,store);
+            });      
+        }
+        catch(const std::exception& e)
+        {
             close(client_fd);
-        });
+            std::cerr << "Could not enqueue client: "<< e.what() << '\n';
+        }
+
+        catch(...)
+        {
+            close(client_fd);
+            std::cerr << "Could not enqueue client: unknown exception\n";
+        }
+       
+       
     }
     
     close(server_fd);
